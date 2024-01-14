@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<!-- 
+		multipart : html 파일전송을 위한 라이브러리
+		maxUploadSize : 최대 파일 크기 설정
+		defaultEncoding : 기본 문자 셋 설정
+	 -->
+	
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+	 <property name="maxUploadSize" value="268435456"/>
+	 <property name="defaultEncoding" value="UTF-8" />
+	</bean>
+		
+</beans>

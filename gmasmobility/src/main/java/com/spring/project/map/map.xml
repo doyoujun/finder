@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.project.map.map">
+	
+	<update id="eventImgUpdate" parameterType="com.spring.project.Dto.dataDTO">
+		UPDATE `shuttleking`.`event_img` SET 
+		`event_img_url` = #{event_img_url}
+		WHERE (`event_img_idx` = #{event_idx});
+	</update>
+	
+	<update id="eventUpdate" parameterType="com.spring.project.Dto.dataDTO">
+		UPDATE `shuttleking`.`event` SET 
+		`event_title` = #{event_title}, 
+		`event_s` = #{event_s}, 
+		`event_e` = #{event_e}, 
+		`event_description` = #{event_description}
+		WHERE (`event_idx` = #{event_idx});
+	</update>
+	
+	<select id="eventBef" resultType="com.spring.project.Dto.dataDTO" parameterType="com.spring.project.Dto.dataDTO">
+		 SELECT *
+	    FROM shuttleking.event
+	    LEFT JOIN event_img AS ni ON event.event_idx = ni.event_img_event_idx
+	    WHERE event.event_createtime <![CDATA[<]]> (
+	        SELECT event_createtime
+	        FROM shuttleking.event
+	        WHERE event_idx = #{event_idx}
+	    )
+	    and `event_del` = 0 
+	    ORDER BY event.event_createtime DESC
+	    LIMIT 1;
+	</select>
+	
+	<select id="eventAft" resultType="com.spring.project.Dto.dataDTO" parameterType="com.spring.project.Dto.dataDTO">
+		SELECT *
+	    FROM shuttleking.event
+	    LEFT JOIN event_img AS ni ON event.event_idx = ni.event_img_event_idx
+	    WHERE event.event_createtime <![CDATA[>]]> (
+	        SELECT event_createtime
+	        FROM shuttleking.event
+	        WHERE event_idx = #{event_idx}
+	    )
+	    and `event_del` = 0
+	    ORDER BY event.event_createtime ASC
+	    LIMIT 1;
+	</select>
+	
+	<insert id="eventImgInsert"
+	parameterType="com.spring.project.Dto.dataDTO">
+		INSERT INTO `shuttleking`.`event_img` 
+		(`event_img_event_idx`, `event_img_url`) 
+		VALUES (#{select_event_idx},#{event_img_url});
+	</insert>
+	
+	<insert id="eventInsert"
+	parameterType="com.spring.project.Dto.dataDTO">
+		INSERT INTO `shuttleking`.`event` 
+		(`event_title`, `event_s`, `event_e`) 
+		VALUES (#{event_title},#{event_s},#{event_e});
+
+		
+		<selectKey keyProperty="select_event_idx" order="AFTER" resultType="int">
+		    SELECT LAST_INSERT_ID() AS event_idx
+		</selectKey>
+		
+	</insert>
+	
+	<select id="eventDetail" resultType="com.spring.project.Dto.dataDTO" parameterType="com.spring.project.Dto.dataDTO">
+		SELECT * FROM shuttleking.event as e
+		left join event_img ei
+		on e.event_idx = ei.event_img_event_idx
+		where e.event_del =0 and e.event_idx=#{event_idx};
+	</select>
+	
+	<select id="eventlist" resultType="com.spring.project.Dto.dataDTO">
+		SELECT * FROM shuttleking.event as e
+		left join event_img ei
+		on e.event_idx = ei.event_img_event_idx
+		where e.event_del =0 order by e.event_createtime desc;
+	</select>
+	
+	<update id="noticeDelete" parameterType="com.spring.project.Dto.dataDTO">
+		UPDATE `shuttleking`.`notice` SET 
+		`notice_del` = '1' 
+		WHERE `notice_idx` = #{notice_idx};
+	</update>
+	
+	<select id="noticeBef" resultType="com.spring.project.Dto.dataDTO" parameterType="com.spring.project.Dto.dataDTO">
+		 SELECT *
+	    FROM shuttleking.notice
+	    LEFT JOIN notice_img AS ni ON notice.notice_idx = ni.notice_img_notice_idx
+	    WHERE notice.notice_createtime <![CDATA[<]]> (
+	        SELECT notice_createtime
+	        FROM shuttleking.notice
+	        WHERE notice_idx = #{notice_idx}
+	    )
+	    and `notice_del` = 0 
+	    ORDER BY notice.notice_createtime DESC
+	    LIMIT 1;
+	</select>
+	
+	<select id="noticeAft" resultType="com.spring.project.Dto.dataDTO" parameterType="com.spring.project.Dto.dataDTO">
+		SELECT *
+	    FROM shuttleking.notice
+	    LEFT JOIN notice_img AS ni ON notice.notice_idx = ni.notice_img_notice_idx
+	    WHERE notice.notice_createtime <![CDATA[>]]> (
+	        SELECT notice_createtime
+	        FROM shuttleking.notice
+	        WHERE notice_idx = #{notice_idx}
+	    )
+	    and `notice_del` = 0
+	    ORDER BY notice.notice_createtime ASC
+	    LIMIT 1;
+	</select>
+	
+	<select id="userDetail" resultType="com.spring.project.Dto.dataDTO" parameterType="com.spring.project.Dto.dataDTO">
+		SELECT * FROM shuttleking.account 
+		where account_enable = 1 
+		and account_division = 0
+		and account_idx = #{account_idx};
+	</select>
+	
+	<select id="userList" resultType="com.spring.project.Dto.dataDTO">
+		SELECT * FROM shuttleking.account 
+		where account_enable = 1 
+		and account_division = 0;
+	</select>
+	
+	<select id="noticeDetail" resultType="com.spring.project.Dto.dataDTO" parameterType="com.spring.project.Dto.dataDTO">
+		SELECT * FROM shuttleking.notice
+		left join notice_img as ni
+		on notice.notice_idx = ni.notice_img_notice_idx
+		where notice.notice_idx=#{notice_idx} and notice.notice_del = 0;
+	</select>
+	
+	<insert id="nocticeImgInsert"
+	parameterType="com.spring.project.Dto.dataDTO">
+		INSERT INTO `shuttleking`.`notice_img` (`notice_img_notice_idx`, `notice_img_url`) 
+		VALUES (#{select_notice_idx}, #{notice_img_url});
+	</insert>
+	
+	<insert id="nocticeInsert"
+	parameterType="com.spring.project.Dto.dataDTO">
+		INSERT INTO `shuttleking`.`notice` (`notice_title`, `notice_description`) 
+		VALUES (#{notice_title},#{notice_description});
+		
+		<selectKey keyProperty="select_notice_idx" order="AFTER" resultType="int">
+		    SELECT LAST_INSERT_ID() AS notice_idx
+		</selectKey>
+		
+	</insert>
+	
+	<select id="noticelist" resultType="com.spring.project.Dto.dataDTO" parameterType="com.spring.project.Dto.dataDTO">
+		SELECT * FROM shuttleking.notice as n
+		left join notice_img as ni
+		on n.notice_idx = ni.notice_img_notice_idx WHERE n.notice_del = 0;
+	</select>
+	
+	<select id="driversRoute" resultType="com.spring.project.Dto.dataDTO" parameterType="com.spring.project.Dto.dataDTO">
+		SELECT * FROM shuttleking.driver_line where driver_line_driver_idx = #{account_idx};
+	</select>
+	
+	<select id="driversDetail" resultType="com.spring.project.Dto.dataDTO" parameterType="com.spring.project.Dto.dataDTO" >
+		SELECT * FROM shuttleking.driver as d
+		left join `account` ac
+		on d.driver_account_idx = ac.account_idx
+		where ac.account_enable = 1 and ac.account_idx = #{account_idx};
+	</select>
+
+	<select id="driverslist" resultType="com.spring.project.Dto.dataDTO">
+		SELECT * FROM shuttleking.driver as d
+		left join `account` ac
+		on d.driver_account_idx = ac.account_idx
+		where ac.account_enable = 1 
+		and ac.account_division = 1;
+	</select>
+	
+	
+	<!-- 
+		* 타이틀: 사용자 회원가입
+	    * 파라미터 : dataDTO
+	    * 리턴값 : -
+	    * 설명 : ① 사용자 회원가입을 위한 쿼리
+	           ② 입력 받은 비밀번호를 (HEX(AES_ENCRYPT(#{user_pw}, 'code')))로 code 라는 키값을 가진 데이터로 변환 후 적재
+	 -->
+	<insert id="insert_user_userInsert"
+	parameterType="com.spring.project.Dto.dataDTO">
+		insert into `user`(user_id, user_pw, user_email, user_name, user_tel, user_add, user_adddetail, user_zipcode, user_sex, role)
+		value(#{user_id},(HEX(AES_ENCRYPT(#{user_pw}, 'code'))), #{user_email},
+		#{user_name}, #{user_tel}, #{user_add}, #{user_adddetail}, #{user_zipcode}, #{user_sex},#{role});
+	</insert>
+	
+	<!-- 
+		* 타이틀: 로그인 쿼리
+	    * 파라미터 : dataDTO
+	    * 리턴값 : dataDTO
+	    * 설명 : ① 사용자 로그인을 위한 쿼리
+	           ② 시큐리티를 사용하지 않을 시 해당 쿼리를 사용해 입력 받은  ID/PW 가 데이터베이스에 존재 하는지 여부 판단
+	           ③ mysql exists 함수가 데이터 존재 여부 판단해주는 함수
+	 -->
+	 
+	 
+	<select id="select_user_userLogin" parameterType="com.spring.project.Dto.dataDTO" resultType="com.spring.project.Dto.dataDTO">
+		select exists(select * from `user` where user_id = #{user_id} 
+		AND user_pw = (HEX(AES_ENCRYPT(#{user_pw}, 'code')))
+		) as `status`;	
+	</select>
+	<!-- 승객 조회 -->
+	<select id="passengerlist" resultType="com.spring.project.Dto.dataDTO">
+		SELECT line.line_idx, line_location.line_location_address, line_location.line_location_destination_address, 
+	CONCAT(
+	IF(TIME_FORMAT(line_location.line_location_start_time, '%p') = 'AM', '오전', '오후'),
+    TIME_FORMAT(line_location.line_location_start_time, ' %h시 %i분') )AS start_time
+
+	FROM shuttleking.line_passengers
+	INNER JOIN line ON line.line_idx = line_passengers.line_passengers_line_idx
+	INNER JOIN line_location ON line_location.line_location_idx = line_passengers.line_passengers_idx
+	WHERE line_passengers_account_idx = #{account_idx}
+	GROUP BY line_idx;
+	
+	</select>
+	<!-- 모든 기사 노선 리스트 -->
+	<select id="alldriverlist" resultType="com.spring.project.Dto.dataDTO">
+		SELECT  line_idx, COUNT(line_passengers_idx) AS current_people_count, account_name, line_location_address, line_destination_address
+		 FROM shuttleking.driver_line
+		INNER JOIN driver ON driver.driver_idx = driver_line.driver_line_driver_idx
+		INNER JOIN account ON account.account_idx = driver.driver_account_idx
+		INNER JOIN line ON line.line_idx = driver_line.driver_line_idx
+		LEFT JOIN line_passengers ON line_passengers.line_passengers_line_idx = line.line_idx
+		INNER JOIN (SELECT * FROM line_location WHERE line_location_boarding_number = 0 OR line_location_boarding_number = 1)location ON location.line_location_line_idx = line.line_idx
+		GROUP BY line.line_idx;
+	
+	</select>
+	
+	<!-- 중단 신청 기사 목록 -->
+	<select id="stopdriverlist" resultType="com.spring.project.Dto.dataDTO">
+SELECT 
+line_idx, COUNT(line_passengers_idx) AS current_people_count, account_name, line_location_address ,line_destination_address, driver_stop_reason FROM shuttleking.driver_stop 
+INNER JOIN driver ON driver.driver_idx = driver_stop.driver_stop_driver_idx
+INNER JOIN account ON account.account_idx = driver.driver_account_idx
+INNER JOIN line ON line.line_idx = driver_stop.driver_stop_line_idx
+LEFT JOIN line_passengers ON line_passengers.line_passengers_line_idx = line.line_idx
+INNER JOIN (SELECT * FROM line_location WHERE line_location_boarding_number = 0 OR line_location_boarding_number = 1)location ON location.line_location_line_idx = line.line_idx;
+	
+	</select>
+	
+	<!-- 승객 노선 리스트 -->
+	<select id="passengerroutelist" resultType="com.spring.project.Dto.dataDTO">
+SELECT 
+line_idx, line_destination_address, line_location_address, COUNT(line_passengers_idx) AS current_people_count, IFNULL(driver_line_idx, 0) AS hasDriver
+FROM shuttleking.line
+LEFT JOIN  (SELECT * FROM line_location WHERE line_location_boarding_number = 0 OR line_location_boarding_number = 1)location ON location.line_location_line_idx = line.line_idx
+LEFT JOIN line_passengers ON line_passengers.line_passengers_line_idx = line.line_idx
+LEFT JOIN driver_line ON driver_line.driver_line_line_idx = line.line_idx AND driver_line_is_active = 0
+GROUP BY line_idx;
+	
+	</select>
+	
+		<!-- 승객 노선 상세리스트 -->
+	<select id="passengerroutedetails" resultType="com.spring.project.Dto.dataDTO">
+SELECT 
+account_idx, account_id, account_name,
+line_operating_fee_line_idx, 
+
+IFNULL(line_operating_fee_deposit_status, 0) 
+
+ AS line_operating_fee_deposit_status, line_stop_passengers_idx, line_stop_passengers_reason, line_stop_passengers_state 
+FROM shuttleking.line_passengers
+INNER JOIN account ON account.account_idx = line_passengers.line_passengers_account_idx
+LEFT JOIN line_operating_fee ON line_operating_fee.line_operating_fee_line_idx = line_passengers.line_passengers_line_idx 
+	AND line_passengers.line_passengers_account_idx = line_operating_fee.line_operating_fee_account_idx
+LEFT JOIN line_stop_passengers ON line_stop_passengers.line_stop_passengers_line_idx = line_passengers.line_passengers_line_idx 
+  AND line_stop_passengers.line_stop_passengers_account_idx = line_passengers.line_passengers_account_idx
+WHERE line_passengers.line_passengers_line_idx= 1
+GROUP BY line_passengers_account_idx;
+	
+	</select>
+	<select id="accounttransfer" resultType="com.spring.project.Dto.dataDTO">
+SELECT 
+line_operating_fee_idx,
+line_operating_fee_date, 
+line_operating_fee_deposit_status,
+line_operating_fee_depositor_name, 
+line_operating_fee_createtime,
+DATE_FORMAT(line_operating_fee_createtime, '%Y.%m.%d') AS formatted_createtime, 
+line_operating_fee_updatetime, 
+a_account.account_id AS driver_account_id, 
+a_account.account_name AS driver_account_name,
+line_location_address, 
+line_idx, line_destination_address,
+b_account.account_id,
+b_account.account_name
+FROM shuttleking.line_operating_fee
+INNER JOIN driver_line ON driver_line.driver_line_line_idx = line_operating_fee.line_operating_fee_line_idx
+INNER JOIN driver ON driver.driver_idx = driver_line_driver_idx
+INNER JOIN account as a_account ON a_account.account_idx = driver_account_idx
+INNER JOIN account as b_account ON b_account.account_idx = line_operating_fee.line_operating_fee_account_idx
+INNER JOIN line ON line.line_idx = driver_line.driver_line_line_idx
+INNER JOIN (SELECT * FROM line_location WHERE line_location_boarding_number = 0 OR line_location_boarding_number = 1) location ON location.line_location_line_idx = line.line_idx
+	
+	</select>
+	<!-- 승객 노선 상단 -->
+	<select id="passengerdetailup" resultType="com.spring.project.Dto.dataDTO">
+SELECT 
+line_idx, line_destination_address, line_location_address, COUNT(line_passengers_idx) AS current_people_count, IFNULL(driver_line_idx, 0) AS hasDriver
+FROM shuttleking.line
+LEFT JOIN  (SELECT * FROM line_location WHERE line_location_boarding_number = 0 OR line_location_boarding_number = 1)location ON location.line_location_line_idx = line.line_idx
+LEFT JOIN line_passengers ON line_passengers.line_passengers_line_idx = line.line_idx
+LEFT JOIN driver_line ON driver_line.driver_line_line_idx = line.line_idx AND driver_line_is_active = 0
+WHERE
+line_idx = #{route_idx};
+	
+	</select>
+	<insert id="createtransfer"
+	parameterType="com.spring.project.Dto.dataDTO">
+		INSERT INTO
+		line_operating_fee(
+			line_operating_fee_line_idx,  -- 노선번호(driver_line)
+			line_operating_fee_account_idx, -- 입금 승객 idx
+			line_operating_fee_date,
+			line_operating_fee_deposit_status, -- 입금 상태
+			line_operating_fee_depositor_name, -- 입금자명
+			line_operating_fee_deposit_amount -- 입금액		
+			)
+		values(
+			#{line_operating_fee_line_idx},
+			#{line_operating_fee_account_idx},
+			#{line_operating_fee_date},
+			#{line_operating_fee_deposit_status},
+			#{line_operating_fee_depositor_name},
+			#{line_operating_fee_deposit_amount}
+
+		);
+		
+	</insert>
+	<select id="driverinfo" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			*
+		FROM 
+			driver_line dl
+			LEFT JOIN line li ON li.line_idx = dl.driver_line_line_idx
+			LEFT JOIN driver dv ON dv.driver_idx = dl.driver_line_driver_idx
+			LEFT JOIN account ac ON ac.account_idx = dv.driver_account_idx
+		where
+			dl.driver_line_line_idx = #{driver_line_line_idx};
+			
+	</select>
+	
+	<select id="searchuser" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			*
+		FROM 
+			account
+		where
+			account_id = #{account_id};
+			
+	</select>
+	
+	<insert id="createquestion"
+	parameterType="com.spring.project.Dto.dataDTO">
+		INSERT INTO
+		question(
+				account_account_idx,
+				question_description,
+				question_title,
+				question_img
+			)
+		values(
+			#{account_account_idx},
+			#{question_description},
+			#{question_title},
+			#{question_img}
+			
+		);
+		
+	</insert>
+	<select id="questionlist" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			qt.*,
+			ac.account_name,
+			DATE_FORMAT(qt.question_createtime, '%Y.%m.%d') AS formatted_createtime 
+		FROM 
+			question qt
+			LEFT JOIN account ac ON ac.account_idx = qt.account_account_idx
+		where
+			qt.question_del = 0
+		ORDER by
+			qt.question_idx DESC;	
+	</select>
+	
+	<select id="questiondetails" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			qt.*,
+			ac.account_name,
+			DATE_FORMAT(qt.question_createtime, '%Y-%m-%d') AS formatted_createtime 
+		FROM 
+			question qt
+			LEFT JOIN account ac ON ac.account_idx = qt.account_account_idx
+		where
+			qt.question_idx = #{question_idx}
+			and
+			qt.question_del = 0;
+	</select>
+	
+	<select id="contactBef" resultType="com.spring.project.Dto.dataDTO" parameterType="com.spring.project.Dto.dataDTO">
+	 SELECT *
+    FROM question
+    WHERE question_createtime <![CDATA[<]]> (
+	        SELECT question_createtime
+	        FROM question
+	        WHERE question_idx = #{question_idx}
+	    )
+	    and question_del = 0 
+    ORDER BY question_createtime DESC
+	    LIMIT 1;
+	</select>
+	
+	<select id="contactAft" resultType="com.spring.project.Dto.dataDTO" parameterType="com.spring.project.Dto.dataDTO">
+	 SELECT *
+    FROM question
+    WHERE question_createtime <![CDATA[>]]> (
+	        SELECT question_createtime
+	        FROM question
+	        WHERE question_idx = #{question_idx}
+	    )
+	    and question_del = 0 
+    ORDER BY question_createtime DESC
+	    LIMIT 1;
+	</select>
+	
+	<select id="questionanswerlist" resultType="com.spring.project.Dto.dataDTO">
+	 SELECT *,
+	 DATE_FORMAT(question_answer_createtime, '%Y.%m.%d(%H:%i:%s)') AS formatted_createtime 
+    FROM question_answer
+    WHERE question_answer_question_idx = #{question_idx}
+    	and question_answer_del = 0;
+	</select>
+	
+	<insert id="createQuestionAnswer"
+	parameterType="com.spring.project.Dto.dataDTO">
+		INSERT INTO
+		question_answer(
+				question_answer_question_idx,
+				question_answer_description,
+				question_answer_writer,
+				question_answer_del
+			)
+		values(
+			#{question_answer_question_idx},
+			#{question_answer_description},
+			#{question_answer_writer},
+			0
+			
+		);
+		
+	</insert>
+	
+	<select id="adminload" resultType="com.spring.project.Dto.dataDTO">
+	 SELECT *
+	 FROM admin
+    WHERE admin_id = #{admin_id};
+	</select>
+	
+	<update id="questiondelete" parameterType="com.spring.project.Dto.dataDTO">
+		   update
+    		question_answer
+		   set
+		   	question_answer_del = '1'
+		   where
+		   	question_answer_idx = #{question_answer_idx};
+	</update>
+	
+	<update id="questiondetailsdelete" parameterType="com.spring.project.Dto.dataDTO">
+		   update
+    		question
+		   set
+		   	question_del = '1'
+		   where
+		   	question_idx = #{question_idx};
+	</update>
+	
+	<update id="answerupdate" parameterType="com.spring.project.Dto.dataDTO">
+		   update
+    		question_answer
+		   set
+		   	question_answer_description = #{question_answer_description}
+		   where
+		   	question_answer_idx = #{question_answer_idx};
+	</update>
+</mapper>

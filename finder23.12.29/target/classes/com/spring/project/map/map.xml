@@ -1,0 +1,552 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.project.map.map">
+	<!-- 
+		* 타이틀: 사용자 회원가입
+	    * 파라미터 : dataDTO
+	    * 리턴값 : -
+	    * 설명 : ① 사용자 회원가입을 위한 쿼리
+	           ② 입력 받은 비밀번호를 (HEX(AES_ENCRYPT(#{user_pw}, 'code')))로 code 라는 키값을 가진 데이터로 변환 후 적재
+	 -->
+	 <!-- 회원가입 -->
+	<insert id="insert_user_userInsert"
+	parameterType="com.spring.project.Dto.dataDTO">
+	INSERT INTO
+		enterprise(
+				enterprise_name,
+				enterprise_id,
+				enterprise_pw,
+				enterprise_terminal,
+				enterprise_companycode,
+				enterprise_enterprise_info_index,
+				enterprise_role
+						
+				)
+			values(
+			
+				#{enterprise_name},
+				#{enterprise_id},
+				#{enterprise_pw},
+				#{enterprise_terminal},
+				#{enterprise_companycode},
+				1,
+				'ROLE_ADMIN'
+				
+			)
+	</insert>
+	<select id="loadMem" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			enterprise_index,
+			enterprise_name,
+			enterprise_id,
+			enterprise_pw,
+			enterprise_terminal,
+			enterprise_companycode,
+			enterprise_createtime,
+			enterprise_updatetime,
+			enterprise_enterprise_info_index,
+			enterprise_role
+		FROM
+			enterprise
+		WHERE
+			enterprise_id = #{username}
+	
+		</select>
+	<select id="urgentload" resultType="com.spring.project.Dto.dataDTO">
+		SELECT
+			ur.*,
+			us.*,
+			DATE_FORMAT(ur.urgent_report_createtime, '%H:%i') AS formatted_createtime
+		FROM
+			urgent_report ur
+			LEFT JOIN user us ON ur.urgent_report_user_index = us.user_index
+		WHERE
+			user_enterprise_info_index = #{user_enterprise_info_index}
+		ORDER by
+			ur.urgent_report_createtime DESC;
+	</select> 
+	<select id="urgentdetails" resultType="com.spring.project.Dto.dataDTO">
+		SELECT
+			ur.*,
+			us.*,
+			DATE_FORMAT(ur.urgent_report_createtime, '%H:%i') AS formatted_createtime
+		FROM
+			urgent_report ur
+			LEFT JOIN user us ON ur.urgent_report_user_index = us.user_index
+		WHERE
+			urgent_report_index = #{urgent_no};
+	</select>
+	
+	<select id="generalload" resultType="com.spring.project.Dto.dataDTO">
+		SELECT
+			gr.*,
+			us.*,
+			DATE_FORMAT(gr.general_report_createtime, '%H:%i') AS general_formatted_createtime
+		FROM
+			general_report gr
+			LEFT JOIN user us ON gr.general_report_user_index = us.user_index
+		WHERE
+			user_enterprise_info_index = #{user_enterprise_info_index}	
+		ORDER by
+			gr.general_report_createtime DESC;
+	</select>
+	<select id="generalUrgentLoad" resultType="com.spring.project.Dto.dataDTO">
+		SELECT
+			gr.*,
+			ur.*,
+			DATE_FORMAT(gr.general_report_createtime, '%H:%i') AS general_formatted_createtime,
+			DATE_FORMAT(ur.urgent_report_createtime, '%H:%i') AS formatted_createtime
+		FROM
+			general_report gr
+			LEFT JOIN urgent_report ur ON TRUE;
+	</select>
+	<select id="userEdit" resultType="com.spring.project.Dto.dataDTO">
+		SELECT
+			*
+		FROM
+			user_edit
+	</select>
+	
+	<select id="userapprove" resultType="com.spring.project.Dto.dataDTO">
+		SELECT
+			*
+		FROM
+			user
+		WHERE
+			user_joinconfirm = 0;
+	</select>
+	
+	<update id="userupdate" parameterType="com.spring.project.Dto.dataDTO">
+		UPDATE
+			user
+		SET
+			user_joinconfirm = #{user_joinconfirm}
+		WHERE
+			user_index = #{user_index}
+	</update>
+	
+	<update id="userchange" parameterType="com.spring.project.Dto.dataDTO">
+		UPDATE
+			user
+		SET
+			user_name = #{user_name},
+			user_team = #{user_team},
+			user_duty = #{user_position},
+			user_vehicle = #{user_vehicle},
+			user_birth = #{user_birth},
+			user_address = #{user_address},
+			user_daddress = #{user_daddress},
+			user_managerphone = #{user_managerphone},
+			user_email = #{user_email}
+		WHERE
+			user_index = #{user_index}
+	</update>
+	<!-- 컨테이너 등록 -->
+	<insert id="createContainer" parameterType="com.spring.project.Dto.dataDTO">
+	INSERT INTO
+		container(
+				container_name,
+				container_img,
+				container_team,
+				container_nationality,
+				container_type,
+				container_IGT,
+				container_portauthoritycode,
+				container_inputdate,
+				container_shippingdate,
+				container_BIDOimg,
+				container_enterprise_info_index
+						
+				)
+			values(
+			
+				#{container_name},
+				#{container_img},
+				#{container_team},
+				#{container_nationality},
+				#{container_type},
+				#{container_IGT},
+				1,
+				#{container_inputdate},
+				#{container_shippingdate},
+				#{container_BIDOimg},
+				#{container_enterprise_info_index}
+				
+			)
+	</insert>
+	<!-- 컨테이너 리스트 -->
+	<select id="containerList" resultType="com.spring.project.Dto.dataDTO">
+		SELECT
+			ct.*,
+			DATE_FORMAT(ct.container_createtime, '%Y-%m-%d') AS formatted_createtime
+		FROM
+			container ct;
+		
+	</select>
+	
+	<update id="updatecontainer" parameterType="com.spring.project.Dto.dataDTO">
+		   update 
+		   	container
+		   set
+		   	container_shippingdate = #{container_shippingdate}
+		   where
+		   	container_index = #{container_index};
+	</update>
+	
+	<insert id="createNotice" parameterType="com.spring.project.Dto.dataDTO">
+	INSERT INTO
+		notice(
+				notice_category,
+				notice_writer,
+				notice_view,
+				notice_title,
+				notice_content,
+				notice_img,
+				notice_del
+
+				)
+			values(
+			
+				#{notice_category},
+				#{notice_writer},
+				#{notice_view},
+				#{notice_title},
+				#{notice_content},
+				#{notice_img},
+				0
+				
+			)
+	</insert>
+	
+	<!-- 공지사항 리스트 -->
+	<select id="noticelist" resultType="com.spring.project.Dto.dataDTO">
+		SELECT
+			nt.*,
+			DATE_FORMAT(nt.notice_createtime, '%Y-%m-%d') AS formatted_createtime
+		FROM
+			notice nt
+		WHERE
+			notice_del = 0
+		order by nt.notice_index desc;
+		
+	</select>
+	<select id="searchList" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			ct.*,
+			DATE_FORMAT(ct.container_createtime, '%Y-%m-%d') AS formatted_createtime 
+		FROM 
+			container ct
+		WHERE 
+			ct.container_name LIKE CONCAT('%', #{container_name}, '%');
+	</select> 
+	<insert id="createEnterprise" parameterType="com.spring.project.Dto.dataDTO">
+	INSERT INTO
+		workcategory(
+				workcategory_name,
+				workcategory_content,
+				workcategory_enterprise_index
+
+				)
+			values(
+			
+				#{workcategory_name},
+				#{workcategory_content},
+				#{workcategory_enterprise_index}
+				
+			)
+	</insert>
+	<select id="ListEnterprise" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			*
+		FROM 
+			workcategory 
+		WHERE 
+			workcategory_enterprise_index = #{enterpriseNumber};
+	</select> 
+	
+	<!-- 기업 체크 -->
+	<select id="EnterpriseCheck" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			*
+		FROM 
+			workcategory 
+		WHERE 
+			workcategory_enterprise_index = #{workcategory_enterprise_index}
+			and
+			workcategory_name = #{workcategory_name}
+			and
+			workcategory_content = #{workcategory_content}
+			;
+	</select> 
+	
+	<!-- 근무자 리스트 -->
+	<select id="workerList" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			us.*,
+			DATE_FORMAT(us.user_createtime, '%Y년 %m월 %d일') AS formatted_createtime 
+		FROM 
+			user us
+		WHERE 
+			us.user_enterprise_info_index = #{enterpriseNumber};
+	</select>
+	
+		<!-- 근무중 리스트 -->
+	<select id="working" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			*
+		FROM 
+			user 
+		WHERE 
+			user_enterprise_info_index = #{enterpriseNumber}
+			and
+			user_workstate = 1
+	</select>
+	
+	<!-- 업무 현황 -->
+	<insert id="createWork" parameterType="com.spring.project.Dto.dataDTO">
+	INSERT INTO
+		work(
+				work_location,
+				work_name,
+				work_nameimg,
+				work_content,
+				work_contentimg,
+				work_status,
+				work_startdate,
+				work_completedate,
+				work_user_index
+
+				)
+			values(
+			
+				#{work_location},
+				#{work_name},
+				#{work_nameimg},
+				#{work_content},
+				#{work_contentimg},
+				#{work_status},
+				#{work_startdate},
+				#{work_completedate},
+				#{work_user_index}
+			)
+	</insert>
+	
+	<!-- 업무 현황 리스트 -->
+	<select id="workList" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			wk.*,
+			us.user_name,
+			us.user_index,
+			DATE_FORMAT(wk.work_assigndate, '%Y-%m-%d(%H:%i)') AS formatted_createtime,
+			DATE_FORMAT(wk.work_assigndate, '%H:%i') AS general_formatted_createtime,
+			DATE_FORMAT(wk.work_startdate, '%H:%i') AS work_startdates,
+			DATE_FORMAT(wk.work_completedate, '%H:%i') AS work_completedates
+		FROM 
+			work wk
+			LEFT JOIN user us ON wk.work_user_index = us.user_index
+		WHERE 
+			us.user_enterprise_info_index = #{enterpriseNumber}
+			and
+			work_status = 1 or work_status = 2;
+	</select> 
+	
+	<!-- 업무 현황 완료 리스트 -->
+	<select id="workcompleteList" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			wk.*,
+			us.user_name,
+			us.user_index,
+			DATE_FORMAT(wk.work_assigndate, '%Y-%m-%d(%H:%i)') AS formatted_createtime,
+			DATE_FORMAT(wk.work_assigndate, '%H:%i') AS general_formatted_createtime,
+			DATE_FORMAT(wk.work_startdate, '%H:%i') AS work_startdates,
+			DATE_FORMAT(wk.work_completedate, '%H:%i') AS work_completedates,
+			DATE_FORMAT(wk.work_completedate, '%Y-%m-%d(%H:%i)') AS work_completedatefull
+		FROM 
+			work wk
+			LEFT JOIN user us ON wk.work_user_index = us.user_index
+		WHERE 
+			us.user_enterprise_info_index = #{enterpriseNumber}
+			and
+			wk.work_status = 3;
+			
+	</select> 
+	
+		<!-- 근무자 더보기 리스트 -->
+	<select id="workerListadd" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			*
+		FROM 
+			user 
+		WHERE 
+			user_enterprise_info_index = #{enterpriseNumber}
+		limit
+			#{start}, 10;
+	</select>
+	
+	<select id="noticedetails" resultType="com.spring.project.Dto.dataDTO">
+		SELECT
+			nt.*,
+			DATE_FORMAT(nt.notice_createtime, '%Y-%m-%d') AS formatted_createtime
+		FROM
+			notice nt
+		WHERE
+			nt.notice_index = #{notice_index};
+	</select>		
+	<select id="noticeBef" resultType="com.spring.project.Dto.dataDTO" parameterType="com.spring.project.Dto.dataDTO">
+	 SELECT *
+    FROM notice
+    WHERE notice_createtime <![CDATA[<]]> (
+	        SELECT notice_createtime
+	        FROM notice
+	        WHERE notice_index = #{notice_index}
+	    )
+	    and notice_del = 0 
+    ORDER BY notice_createtime DESC
+	    LIMIT 1;
+	</select>
+	
+	<select id="noticeAft" resultType="com.spring.project.Dto.dataDTO" parameterType="com.spring.project.Dto.dataDTO">
+	 SELECT *
+    FROM notice
+    WHERE notice_createtime <![CDATA[>]]> (
+	        SELECT notice_createtime
+	        FROM notice
+	        WHERE notice_index = #{notice_index}
+	    )
+	    and notice_del = 0 
+
+	    LIMIT 1;
+	</select>
+	
+	<update id="updatenotice" parameterType="com.spring.project.Dto.dataDTO">
+		   update notice
+		   set
+		   	notice_category = #{notice_category},
+		   	notice_title = #{notice_title},
+		   	notice_content = #{notice_content}
+		   where
+		   	notice_index = #{notice_index};
+	</update>
+	
+	<update id="updateview" parameterType="com.spring.project.Dto.dataDTO">
+		   update notice
+		   set
+		   	notice_view = notice_view + 1
+		   where
+		   	notice_index = #{notice_index};
+	</update>
+	
+	<update id="viewdelete" parameterType="com.spring.project.Dto.dataDTO">
+		   update notice
+		   set
+		   	notice_del = 1
+		   where
+		   	notice_index = #{notice_index};
+	</update>
+	
+	<insert id="createvehicle" parameterType="com.spring.project.Dto.dataDTO">
+	INSERT INTO
+		vehicle(
+				vehicle_name,
+				vehicle_num,
+				vehicle_inputdate,
+				vehicle_manager,
+				vehicle_img,
+				vehicle_enterprise_index,
+				vehicle_enterprise_info_index
+
+				)
+			values(
+			
+				#{vehicle_name},
+				#{vehicle_num},
+				#{vehicle_inputdate},
+				#{vehicle_manager},
+				#{vehicle_img},
+				#{vehicle_enterprise_index},
+				#{vehicle_enterprise_info_index}
+			)
+	</insert>
+	
+	<!-- 차량 리스트 -->
+	<select id="vehiclelist" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			vh.*,
+			DATE_FORMAT(vh.vehicle_createtime, '%Y년 %m월 %d일') AS formatted_createtime 
+		FROM 
+			vehicle vh
+		WHERE 
+			vh.vehicle_enterprise_info_index = #{vehicle_enterprise_info_index}
+			and
+			vh.vehicle_del = 0;
+	</select>
+	
+	<!-- 차량 상세 -->
+	<select id="vehicledetail" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			vh.*,
+			DATE_FORMAT(vh.vehicle_createtime, '%Y년 %m월 %d일') AS formatted_createtime 
+		FROM 
+			vehicle vh
+		WHERE 
+			vh.vehicle_index = #{vehicle_index};
+	</select>
+	
+	
+	<!-- 차량 삭제 -->
+	<update id="vehicledelete" parameterType="com.spring.project.Dto.dataDTO">
+		   update
+    		vehicle
+		   set
+		   	vehicle_del = 1
+		   where
+		   	vehicle_index = #{vehicle_index};
+	</update>
+	<!-- 차량 수정 -->
+	<update id="vehicleupdate" parameterType="com.spring.project.Dto.dataDTO">
+		   update
+    		vehicle
+		   set
+		   	vehicle_name = #{vehicle_name},
+		   	vehicle_num = #{vehicle_num},
+		   	vehicle_manager = #{vehicle_manager},
+		   	vehicle_img = #{vehicle_img}
+		   where
+		   	vehicle_index = #{vehicle_index};
+	</update>
+	<!-- 완료 업무 -->
+	<select id="searchwork" resultType="com.spring.project.Dto.dataDTO">
+		SELECT 
+			wk.*,
+			us.user_name,
+			us.user_index,
+			DATE_FORMAT(wk.work_assigndate, '%Y-%m-%d(%H:%i)') AS formatted_createtime,
+			DATE_FORMAT(wk.work_assigndate, '%H:%i') AS general_formatted_createtime,
+			DATE_FORMAT(wk.work_startdate, '%H:%i') AS work_startdates,
+			DATE_FORMAT(wk.work_completedate, '%H:%i') AS work_completedates
+		FROM 
+			work wk
+			LEFT JOIN user us ON wk.work_user_index = us.user_index
+		WHERE 
+			us.user_enterprise_info_index = #{user_enterprise_info_index}
+			and
+			wk.work_assigndate LIKE CONCAT('%', #{work_assigndate}, '%')
+			and
+			wk.work_status = 3;
+	</select>
+	<!-- 
+		* 타이틀: 로그인 쿼리
+	    * 파라미터 : dataDTO
+	    * 리턴값 : dataDTO
+	    * 설명 : ① 사용자 로그인을 위한 쿼리
+	           ② 시큐리티를 사용하지 않을 시 해당 쿼리를 사용해 입력 받은  ID/PW 가 데이터베이스에 존재 하는지 여부 판단
+	           ③ mysql exists 함수가 데이터 존재 여부 판단해주는 함수
+	 -->
+	<select id="select_user_userLogin" parameterType="com.spring.project.Dto.dataDTO" resultType="com.spring.project.Dto.dataDTO">
+		select exists(select * from `user` where user_id = #{user_id} 
+		AND user_pw = (HEX(AES_ENCRYPT(#{user_pw}, 'code')))
+		) as `status`;	
+	</select>
+	
+</mapper>
