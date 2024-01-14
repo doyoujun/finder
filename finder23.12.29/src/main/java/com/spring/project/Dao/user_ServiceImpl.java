@@ -42,7 +42,7 @@ public class user_ServiceImpl implements user_Service {
 	public int userInsert(dataDTO datadto) {		
 		
 		datadto.setEnterprise_pw(passwordEncoder.encode(datadto.getEnterprise_pw()));
-		
+		System.out.println("git");
 		
 		return user_dao.insert_user_userInsert(datadto);
 	}
